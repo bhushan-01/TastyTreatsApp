@@ -13,6 +13,7 @@ const CounterSlice = createSlice({
     },
     ProductDetails:(state,action) =>{
       state.ProductDetails = action.payload
+
     }
   },
 });

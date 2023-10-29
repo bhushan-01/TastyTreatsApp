@@ -7,29 +7,39 @@ import Loadercomponent from '../../components/Loadercomponent/Loadercomponent';
 
 const MainScreen = ({ navigation }) => {
   const [details, setDetails] = useState([]);
-  const [filteredDetails, setFilteredDetails] = useState([]); // State for filtered products
+  const [filteredDetails, setFilteredDetails] = useState([]); 
   const [isLoading, setIsLoading] = useState(false);
-  const [searchText, setSearchText] = useState(''); // State for search input text
-
+  const [searchText, setSearchText] = useState(''); 
+  const [currentIndex,setCurrentIndex] = useState(1)
   useEffect(() => {
-    Products();
+    Products(currentIndex);
   }, []);
 
   useEffect(() => {
-    // Filter products when searchText changes
+
     filterProducts();
   }, [searchText, details]);
 
-  const Products = () => {
+  const Products = (currentIndex) => {
     setIsLoading(true);
+    const skip = (currentIndex - 1) * 10;
+
     axios({
       method: 'get',
-      url: DetailsAPI,
+      url: DetailsAPI+`?skip=${skip}&limit=${10}`, 
     })
       .then((response) => {
+
         setIsLoading(false);
         if (response?.status === 200) {
-          setDetails(response?.data?.products);
+          if(response.data.products.length>0){
+            if(currentIndex==1){
+              setDetails(response.data.products)
+            }else{
+              setDetails([...details,...response?.data?.products]);
+            }
+            setCurrentIndex(currentIndex)
+          }
           
         }
       })
@@ -39,7 +49,7 @@ const MainScreen = ({ navigation }) => {
       });
   };
 
-  // Function to filter products based on searchText
+  
   const filterProducts = () => {
     const filteredProducts = details.filter((product) => {
       return product.title.toLowerCase().includes(searchText.toLowerCase());
@@ -60,9 +70,18 @@ const MainScreen = ({ navigation }) => {
         value={searchText}
       />
       <FlatList
-        data={filteredDetails} // Use the filtered products list
-        keyExtractor={(item) => item.id.toString()}
+        data={filteredDetails} 
+        keyExtractor={(item,index) => `${index}+product-item`}
         renderItem={renderItem}
+        onEndReachedThreshold={0.8}
+        onEndReached={()=>{
+          console.log("sdfddf")
+          if(searchText.length==0){
+
+            Products(currentIndex+1)
+          }
+        }
+        }
       />
       <Loadercomponent Visible={isLoading} />
     </SafeAreaView>

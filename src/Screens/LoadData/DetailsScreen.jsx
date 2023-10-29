@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,26 +9,28 @@ import {
   Dimensions,
 } from 'react-native';
 import Carousel from 'react-native-snap-carousel';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useSelector } from 'react-redux';
+import {useSelector} from 'react-redux';
 import Loadercomponent from '../../components/Loadercomponent/Loadercomponent';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-const DetailsScreen = (props) => {
+const DetailsScreen = props => {
   const navigation = useNavigation();
-  const product = useSelector((state) => state?.newAuth?.ProductDetails);
+  const product = useSelector(state => state?.newAuth?.ProductDetails);
   const carouselRef = useRef(null);
 
-  const renderImageItem = ({ item, index }) => (
-    <Image style={styles.carouselImage} source={{ uri: item }} />
+  const renderImageItem = ({item, index}) => (
+    <View style={{borderRadius: 10, overflow: 'hidden'}}>
+      <Image style={styles.carouselImage} source={{uri: item}} />
+    </View>
   );
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const onSnapToItem = (index) => {
+  const onSnapToItem = index => {
     setActiveIndex(index);
 
     if (index === product.images.length - 1) {
@@ -41,23 +43,21 @@ const DetailsScreen = (props) => {
   };
 
   useEffect(() => {
-    
     setTimeout(() => {
-      setIsLoading(false); 
-    }, 2000); 
+      setIsLoading(false);
+    }, 2000);
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{flex: 1}}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
+          style={styles.backButton}>
           <Icon name="chevron-left" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.screenName}>Details</Text>
-        <View style={{ width: 24, marginRight: 20 }} />
+        <View style={{width: 24, marginRight: 20}} />
       </View>
 
       <ScrollView style={styles.container}>
@@ -69,16 +69,18 @@ const DetailsScreen = (props) => {
               ref={carouselRef}
               data={product.images}
               renderItem={renderImageItem}
-              sliderWidth={380}
-              itemWidth={300}
+              sliderWidth={width * 0.9}
+              itemWidth={width * 0.75} 
+              loop={true}
               autoplay={true}
               autoplayInterval={3000}
-              onSnapToItem={onSnapToItem}
             />
 
             <View style={styles.productDetails}>
               <Text style={styles.productTitle}>{product.title}</Text>
-              <Text style={styles.productDescription}>{product.description}</Text>
+              <Text style={styles.productDescription}>
+                {product.description}
+              </Text>
               <Text style={styles.productPrice}>
                 Price: ${product.price.toFixed(2)}
               </Text>
@@ -97,12 +99,13 @@ const DetailsScreen = (props) => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: '#f0f0f0', // Light gray
   },
   carouselImage: {
-    width: 300,
-    borderRadius: 13,
-    height: 300,
+    width: width * 0.9,
+    height: height * 0.3,
+    resizeMode: 'cover',
+    overflow: 'hidden',
   },
   productDetails: {
     marginTop: 16,

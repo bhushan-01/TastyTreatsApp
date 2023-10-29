@@ -7,5 +7,5 @@ const rootReducer = combineReducers({
 
 export default rootReducer;
 
-// Define RootState type
+
 export type RootState = ReturnType<typeof rootReducer>;
