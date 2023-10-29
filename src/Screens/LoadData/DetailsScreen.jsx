@@ -75,7 +75,7 @@ const DetailsScreen = props => {
               autoplay={true}
               autoplayInterval={3000}
             />
-
+         
             <View style={styles.productDetails}>
               <Text style={styles.productTitle}>{product.title}</Text>
               <Text style={styles.productDescription}>
@@ -86,7 +86,7 @@ const DetailsScreen = props => {
               </Text>
               <Text style={styles.productRating}>Rating: {product.rating}</Text>
             </View>
-
+                           
             <TouchableOpacity style={styles.addToCartButton}>
               <Text style={styles.addToCartButtonText}>Add to Cart</Text>
             </TouchableOpacity>
@@ -99,7 +99,7 @@ const DetailsScreen = props => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#f0f0f0', // Light gray
+    backgroundColor: '#f0f0f0', 
   },
   carouselImage: {
     width: width * 0.9,
