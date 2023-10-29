@@ -11,7 +11,7 @@ const Stackrouter = () => {
   return (
     <Stack.Navigator
     
-    initialRouteName='MainScreen'
+    initialRouteName='BottomTabBar'
     screenOptions={{
         cardStyle: {backgroundColor: '#000'},
         headerShown: false,

@@ -30,7 +30,7 @@ const MainScreen = ({ navigation }) => {
         setIsLoading(false);
         if (response?.status === 200) {
           setDetails(response?.data?.products);
-          console.log(response?.data,"heythereami")
+          
         }
       })
       .catch((error) => {
