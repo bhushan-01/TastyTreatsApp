@@ -70,6 +70,7 @@ const MainScreen = ({ navigation }) => {
         value={searchText}
       />
       <FlatList
+      showsVerticalScrollIndicator={false}
         data={filteredDetails} 
         keyExtractor={(item,index) => `${index}+product-item`}
         renderItem={renderItem}
