@@ -2,7 +2,8 @@ import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
   value: 0,
-  ProductDetails:{}
+  ProductDetails:{},
+  CartItem:{}
 };
 const CounterSlice = createSlice({
   name: 'counter',
@@ -14,8 +15,11 @@ const CounterSlice = createSlice({
     ProductDetails:(state,action) =>{
       state.ProductDetails = action.payload
 
+    },
+    CartItems:(state,action) =>{
+      state.CartItem = action.payload
     }
   },
 });
-export const {Increment,ProductDetails} = CounterSlice.actions;
+export const {Increment,ProductDetails,CartItems} = CounterSlice.actions;
 export default CounterSlice.reducer;
