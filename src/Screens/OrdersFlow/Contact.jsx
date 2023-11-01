@@ -15,6 +15,10 @@ const Contact = () => {
 
       <View style={styles.contactMethodContainer}>
         <Text style={styles.contactMethodLabel}>Preferred Contact Method:</Text>
+
+        <View style={{flexDirection:'row'
+      ,marginTop:10}}>
+
         <TouchableOpacity
           style={[
             styles.contactMethodButton,
@@ -27,12 +31,13 @@ const Contact = () => {
         <TouchableOpacity
           style={[
             styles.contactMethodButton,
-            contactMethod === 'Phone' ? styles.activeContactMethod : null,
+            contactMethod === 'Phone' ? styles.activeContactMethod : null,{marginHorizontal:4}
           ]}
           onPress={() => setContactMethod('Phone')}
         >
           <Text style={[styles.contactMethodText, contactMethod === 'Phone' ? styles.activeText : null]}>Phone</Text>
         </TouchableOpacity>
+        </View>
       </View>
 
       <TextInput
@@ -62,8 +67,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   contactMethodContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+
 
    
     marginBottom: 16,
@@ -78,8 +82,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#007acc',
+    width:'23%',
     backgroundColor: 'white',
-    marginHorizontal:4
+
 
   },
   activeContactMethod: {

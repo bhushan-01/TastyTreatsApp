@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
-    marginRight:"30%"
+    marginRight:"41%"
   },
   filterIcon: {
     padding: 8,
