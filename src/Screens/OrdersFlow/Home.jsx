@@ -11,13 +11,12 @@ import {
   Pressable,
   Switch,
 } from 'react-native';
-import { CheckBox } from 'react-native-elements';   
-import RBSheet from 'react-native-raw-bottom-sheet';
+
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import {IMAGEPATH} from '../../assets/Images/Imagepath';
-import { useDispatch } from 'react-redux';
-import { CartItems } from '../../Store/CounterSlice';
-import ModalDropdown from 'react-native-modal-dropdown';
+import {useDispatch} from 'react-redux';
+import {CartDetails} from '../../Store/CounterSlice';
+
 
 import ModalSelector from 'react-native-modal-selector';
 
@@ -26,7 +25,7 @@ const imageMapping = {
   2: IMAGEPATH.Foodtwo,
   3: IMAGEPATH.Foodthree,
   4: IMAGEPATH.Foodfour,
-  // Add mappings for other image IDs here
+  
 };
 const dummyRecipes = [
   {
@@ -35,17 +34,17 @@ const dummyRecipes = [
     description: 'A delicious vegetarian pizza with assorted veggies.',
     image: imageMapping[1],
     price: 12.99,
-    veg: true, // Indicates it's a vegetarian dish
-    category: 'veg'
+    veg: true, 
+    category: 'veg',
   },
   {
     id: 2,
     name: 'Chicken Pepperoni Pizza',
     description: 'Classic pepperoni pizza with extra cheese and tomato sauce.',
-    image:imageMapping[3],
+    image: imageMapping[3],
     price: 14.99,
-    veg: false, // Indicates it's not vegetarian
-    category: 'non-veg'
+    veg: false, 
+    category: 'non-veg',
   },
   {
     id: 3,
@@ -54,7 +53,7 @@ const dummyRecipes = [
     image: imageMapping[1],
     price: 9.99,
     veg: false,
-    category: 'veg'
+    category: 'veg',
   },
   {
     id: 4,
@@ -64,16 +63,16 @@ const dummyRecipes = [
     image: imageMapping[2],
     price: 11.99,
     veg: true,
-    category: 'non-veg'
+    category: 'non-veg',
   },
   {
     id: 5,
     name: 'Veggie Sushi Rolls',
     description: 'Sushi rolls with a variety of fresh vegetables and rice.',
-    image:imageMapping[3],
+    image: imageMapping[3],
     price: 10.99,
     veg: true,
-    category: 'veg'
+    category: 'veg',
   },
   {
     id: 6,
@@ -82,209 +81,191 @@ const dummyRecipes = [
     image: imageMapping[4],
     price: 13.99,
     veg: false,
-    category: 'non-veg'
+    category: 'non-veg',
   },
-
 ];
 
-const Home = ({props,navigation}) => {
-  const bottomSheetRef = React.createRef();
+const Home = ({ navigation }) => {
   const [cart, setCart] = useState([]);
-  const [message, setMessage] = useState('');
-  const [SearchText, setSearchText] = useState()
+
+  const [SearchText, setSearchText] = useState('');
   const [filter, setFilter] = useState('both');
   const [filteredRecipes, setFilteredRecipes] = useState(dummyRecipes);
+  const [sortOrder, setSortOrder] = useState('asc');
+  const dispatch = useDispatch();
 
   const onFilterChange = (value) => {
     setFilter(value);
-    if (value === 'both') {
-      setFilteredRecipes(dummyRecipes);
-    } else if (value === 'veg') {
-      const vegRecipes = dummyRecipes.filter((recipe) => recipe.veg);
-      setFilteredRecipes(vegRecipes);
-    } else if (value === 'non-veg') {
-      const nonVegRecipes = dummyRecipes.filter((recipe) => !recipe.veg);
-      setFilteredRecipes(nonVegRecipes);
-    }
+    const filterRecipes = (recipe) => (value === 'both' || (value === 'veg' && recipe.veg) || (value === 'non-veg' && !recipe.veg));
+    setFilteredRecipes(dummyRecipes.filter(filterRecipes));
   };
 
-
-const filterRecipes = (text) => {
-  const filtered = dummyRecipes.filter((recipe) =>
-    recipe.name.toLowerCase().includes(text.toLowerCase())
-  );
-  setFilteredRecipes(filtered);
-};
-
-
- 
-  const addToCart = item => {
-    const itemInCartIndex = cart.findIndex(cartItem => cartItem.id === item.id);
-
-    if (itemInCartIndex > -1) {
-     
-      const updatedCart = [...cart];
-      updatedCart[itemInCartIndex].quantity += 1;
-      setCart(updatedCart);
-      setMessage(`Added ${item.name} to the cart`);
-      console.log('Cart after adding to cart:', updatedCart); 
-    } else {
-    
-      const updatedCart = [...cart, {...item, quantity: 1}];
-      setCart(updatedCart);
-      setMessage(`Added ${item.name} to the cart`);
-      console.log('Cart after adding to cart:', updatedCart); 
-    }
+  const sortRecipes = () => {
+    const sortedRecipes = [...filteredRecipes];
+    sortedRecipes.sort((a, b) => (sortOrder === 'asc' ? a.price - b.price : b.price - a.price));
+    setFilteredRecipes(sortedRecipes);
   };
 
-  const incrementQuantity = item => {
-    const updatedCart = cart.map(cartItem => {
+  useEffect(() => {
+    sortRecipes();
+  }, [sortOrder]);
+
+  const addToCart = (item) => {
+    const cartItemIndex = cart.findIndex((cartItem) => cartItem.id === item.id);
+    const updatedCart = cartItemIndex > -1 ? cart.map((cartItem) => (cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem)) : [...cart, { ...item, quantity: 1 }];
+    setCart(updatedCart);
+  
+  };
+
+  const updateQuantity = (item, increment) => {
+    const updatedCart = cart.map((cartItem) => {
       if (cartItem.id === item.id) {
-        cartItem.quantity += 1; 
+        const newQuantity = increment ? cartItem.quantity + 1 : cartItem.quantity - 1;
+        return { ...cartItem, quantity: newQuantity };
       }
       return cartItem;
     });
     setCart(updatedCart);
-    console.log('Cart after incrementing quantity:', updatedCart); 
   };
 
-  const decrementQuantity = item => {
-    const updatedCart = cart.map(cartItem => {
-      if (cartItem.id === item.id) {
-        if (cartItem.quantity > 1) {
-          cartItem.quantity -= 1; 
-        }
-      }
-      return cartItem;
-    });
+  const removeItem = (item) => {
+    const updatedCart = cart.filter((cartItem) => cartItem.id !== item.id);
     setCart(updatedCart);
-    console.log('Cart after decrementing quantity:', updatedCart);
   };
 
-  const removeItem = item => {
-    const updatedCart = cart.filter(cartItem => cartItem.id !== item.id);
-    setCart(updatedCart);
-    console.log('Cart after removing item:', updatedCart); 
-  };
-  const cartTotal = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0,
-  );
-
-
- 
- 
-
+  const cartTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
   return (
     <View style={styles.container}>
-    <View style={styles.header}>
-      <Text style={styles.screenName}>Recipes</Text>
-  
-      <ModalSelector
-  data={[
-    { key: 0, label: 'Both' },
-    { key: 1, label: 'Veg' },
-    { key: 2, label: 'Non-Veg' }
-  ]}
-  initValue="Select Filter"
-  onChange={(option) => {
-    switch (option.key) {
-      case 0:
-        onFilterChange('both');
-        break;
-      case 1:
-        onFilterChange('veg');
-        break;
-      case 2:
-        onFilterChange('non-veg');
-        break;
-      default:
-        break;
-    }
-  }}
-/>
+      <View style={styles.header}>
+        <Text style={styles.screenName}>Recipes</Text>
+        <ModalSelector
+          data={[
+            { key: 0, label: 'Both' },
+            { key: 1, label: 'Veg' },
+            { key: 2, label: 'Non-Veg' },
+          ]}
+          initValue="Select Filter"
+          onChange={(option) => {
+            onFilterChange(option.key === 0 ? 'both' : option.key === 1 ? 'veg' : 'non-veg');
+          }}
+        />
+        <TouchableOpacity
+          style={styles.filterIcon}
+          onPress={() => bottomSheetRef.current.open()}
+        >
+          <FontAwesome5 name="filter" size={24} color="#007acc" />
+        </TouchableOpacity>
+      </View>
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Search by name..."
+        value={SearchText}
+        onChangeText={(text) => {
+          setSearchText(text);
+          const filtered = dummyRecipes.filter((recipe) =>
+            recipe.name.toLowerCase().includes(text.toLowerCase())
+          );
+          setFilteredRecipes(filtered);
+        }}
+      />
+      <Text style={{ marginLeft: 13 }}>Sort by prices:</Text>
+      <View style={styles.sortButtonsContainer}>
+        <TouchableOpacity
+          style={[
+            styles.sortButton,
+            sortOrder === 'asc' && styles.activeSortButton,
+          ]}
+          onPress={() => setSortOrder('asc')}
+        >
+          <Text style={[styles.sortButtonText, sortOrder === 'asc' && styles.activeSortButtonText]}>
+            Low to High
+        </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.sortButton,
+            sortOrder === 'desc' && styles.activeSortButton,
+          ]}
+          onPress={() => setSortOrder('desc')}
+        >
+          <Text style={[styles.sortButtonText, sortOrder === 'desc' && styles.activeSortButtonText]}>
+            High to Low
+          </Text>
+        </TouchableOpacity>
+      </View>
+      
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        data={filteredRecipes}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => {
+          const cartItem = cart.find((cartItem) => cartItem.id === item.id);
+          const quantity = cartItem ? cartItem.quantity : 0;
 
-    </View>
-     <TextInput
- style={styles.searchBar}
- placeholder="Search by name..."
- value={SearchText}
- onChangeText={(text) => {
-   setSearchText(text);
-   filterRecipes(text);
- }}
-/>
-
-  
-    {message ? <Text style={styles.successMessage}>{message}</Text> : null}
-    <FlatList
-      showsVerticalScrollIndicator={false}
-      data={filteredRecipes}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item }) => {
-        const cartItem = cart.find((cartItem) => cartItem.id === item.id);
-        const quantity = cartItem ? cartItem.quantity : 0;
-
-        return (
-          <View style={styles.recipeCard}>
-            <Image source={item.image} style={styles.recipeImage} />
-            <Text style={styles.recipeName}>{item.name}</Text>
-            <Text style={styles.recipeDescription}>{item.description}</Text>
-            <Text style={styles.recipePrice}>
-              Price: ${item.price.toFixed(2)}
-            </Text>
-            <View style={styles.cartActions}>
-              {cartItem ? (
-                <View style={styles.quantityControls}>
+          return (
+            <View style={styles.recipeCard}>
+              <Image source={item.image} style={styles.recipeImage} />
+              <Text style={styles.recipeName}>{item.name}</Text>
+              <Text style={styles.recipeDescription}>{item.description}</Text>
+              <Text style={styles.recipePrice}>
+                Price: ${item.price.toFixed(2)}
+              </Text>
+              <View style={styles.cartActions}>
+                {cartItem ? (
+                  <View style={styles.quantityControls}>
+                    <TouchableOpacity
+                      style={styles.quantityButton}
+                      onPress={() => updateQuantity(item, false)}
+                    >
+                      <Text style={styles.quantityButtonText}>-</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.quantityText}>{quantity}</Text>
+                    <TouchableOpacity
+                      style={styles.quantityButton}
+                      onPress={() => updateQuantity(item, true)}
+                    >
+                      <Text style={styles.quantityButtonText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
                   <TouchableOpacity
-                    style={styles.quantityButton}
-                    onPress={() => decrementQuantity(item)}
+                    style={styles.cartActionButton}
+                    onPress={() => addToCart(item)}
                   >
-                    <Text style={styles.quantityButtonText}>-</Text>
+                    <Text style={styles.cartActionButtonText}>Add to Cart</Text>
                   </TouchableOpacity>
-                  <Text style={styles.quantityText}>{quantity}</Text>
-                  <TouchableOpacity
-                    style={styles.quantityButton}
-                    onPress={() => incrementQuantity(item)}
-                  >
-                    <Text style={styles.quantityButtonText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
+                )}
                 <TouchableOpacity
-                  style={styles.cartActionButton}
-                  onPress={() => addToCart(item)}
+                  style={styles.removeButton}
+                  onPress={() => removeItem(item)}
                 >
-                  <Text style={styles.cartActionButtonText}>Add to Cart</Text>
+                  <Text style={styles.cartActionButtonText}>Remove</Text>
                 </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => removeItem(item)}
-              >
-                <Text style={styles.cartActionButtonText}>Remove</Text>
-              </TouchableOpacity>
+              </View>
             </View>
+          );
+        }}
+      />
+      <View style={styles.cartTotalContainer}>
+        <Text style={styles.cartTotal}>Cart Total: ${cartTotal.toFixed(2)}</Text>
+        <TouchableOpacity
+          style={styles.viewCartButton}
+          onPress={() => {
+            navigation.navigate('Cart', { cart });
+            dispatch(CartDetails(cart));
+          }}
+        >
+          <View style={styles.viewCartButtonInner}>
+            <Text style={styles.viewCartButtonText}>View Cart</Text>
+            <FontAwesome5 name="arrow-right" size={20} color="#fff" />
           </View>
-        );
-      }}
-    />
-    <View style={styles.cartTotalContainer}>
-      <Text style={styles.cartTotal}>Cart Total: ${cartTotal.toFixed(2)}</Text>
-      <TouchableOpacity
-        style={styles.viewCartButton}
-        onPress={() =>navigation.navigate('Cart', { cart })}
-      >
-        <View style={styles.viewCartButtonInner}>
-          <Text style={styles.viewCartButtonText}>View Cart</Text>
-          <FontAwesome5 name="arrow-right" size={20} color="#fff" />
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </View>
     </View>
-  </View>
-);
+  );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -293,6 +274,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    width:"100%",
     paddingVertical: 10,
     paddingHorizontal: 16,
     backgroundColor: '#007acc',
@@ -301,6 +283,7 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
+    marginRight:"30%"
   },
   filterIcon: {
     padding: 8,
@@ -313,53 +296,27 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   searchBar: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 10,
     margin: 16,
     fontSize: 16,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    shadowColor: 'gray',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 3,
   },
-  filterContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginVertical: 10,
-  },
-  filterModal: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 16,
-  },
-  filterTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  filterSection: {
-    marginBottom: 20,
-  },
-  filterSectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  filterSwitch: {
+  sortButtonsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  filterButton: {
-    padding: 8,
-    borderWidth: 1,
-    borderColor: '#007acc',
-    borderRadius: 8,
-  },
-  activeFilterButton: {
-    backgroundColor: '#007acc',
-    padding: 8,
-    borderRadius: 8,
-  },
-  filterButtonText: {
-    color: 'black',
+    margin: 10,
   },
   sortButton: {
     padding: 10,
@@ -369,20 +326,15 @@ const styles = StyleSheet.create({
     margin: 4,
   },
   activeSortButton: {
-    backgroundColor: '#007acc',
-  },
-  sortButtonText: {
-    color: '#007acc',
-    fontWeight: 'bold',
-  },
-  filterCloseButton: {
-    backgroundColor: '#007acc',
-    padding: 12,
+    backgroundColor: 'blue',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'blue',
     borderRadius: 8,
-    alignItems: 'center',
+    margin: 4,
   },
-  filterCloseButtonText: {
-    color: 'white',
+  activeSortButtonText: {
+    color: '#fff',
     fontWeight: 'bold',
   },
   recipeCard: {
@@ -425,16 +377,11 @@ const styles = StyleSheet.create({
   },
   quantityControls: {
     flexDirection: 'row',
-   
-  
-
-
   },
   quantityButton: {
     backgroundColor: 'lightgray',
-    marginHorizontal:8,
-    paddingHorizontal:10,
-    
+    marginHorizontal: 8,
+    paddingHorizontal: 10,
     borderRadius: 4,
   },
   quantityButtonText: {

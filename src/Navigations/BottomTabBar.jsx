@@ -36,14 +36,10 @@ const BottomTabBar = () => {
       />
       <Tab.Screen name="Contact" component={Contact} options={{
           tabBarIcon: ({color, size}) => (
-            <Entypo name="shopping-cart" size={size} color={color} />
-          ),
-        }} />
-      <Tab.Screen name="Cart" component={Cart}  options={{
-          tabBarIcon: ({color, size}) => (
             <MaterialCommunityIcons name="contacts" size={size} color={color} />
           ),
-        }}/>
+        }} />
+ 
     </Tab.Navigator>
   );
 };

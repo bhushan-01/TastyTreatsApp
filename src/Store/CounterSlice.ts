@@ -3,7 +3,7 @@ import {createSlice} from '@reduxjs/toolkit';
 const initialState = {
   value: 0,
   ProductDetails:{},
-  CartItem:{}
+  CartDetails:{}
 };
 const CounterSlice = createSlice({
   name: 'counter',
@@ -16,10 +16,10 @@ const CounterSlice = createSlice({
       state.ProductDetails = action.payload
 
     },
-    CartItems:(state,action) =>{
-      state.CartItem = action.payload
+    CartDetails:(state,action) =>{
+      state.CartDetails = action.payload
     }
   },
 });
-export const {Increment,ProductDetails,CartItems} = CounterSlice.actions;
+export const {Increment,ProductDetails,  CartDetails} = CounterSlice.actions;
 export default CounterSlice.reducer;
